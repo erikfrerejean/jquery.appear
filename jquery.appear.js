@@ -13,11 +13,12 @@
 
   var check_binded = false;
   var check_lock = false;
+  var $window = $(window);
   var defaults = {
     interval: 250,
-    force_process: false
+    force_process: false,
+    scrolling_parent: $window
   }
-  var $window = $(window);
 
   var $prior_appeared;
 
@@ -76,7 +77,11 @@
           setTimeout(process, opts.interval);
         };
 
-        $(window).scroll(on_check).resize(on_check);
+        opts.scrolling_parent.scroll(on_check);
+        // resize event is only triggered for $window so no point setting it on scrolling_parent
+        // if scrolling_parent is resizeable you should make sure your resizing code calls .resize()
+        $window.resize(on_check);
+
         check_binded = true;
       }
 
