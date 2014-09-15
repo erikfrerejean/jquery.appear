@@ -2,14 +2,14 @@
 
 A fork of the plugin on https://github.com/morr/jquery.appear
 
-What changed:
+## What changed:
 
- - removed timeouts. It uses jQuery.debounce plugin instead
- - removed force_process
- - added disappear method in order to remove an element from being observed
+ * removed timeouts. It uses jQuery.debounce plugin instead
+ * removed force_process
+ * added disappear method in order to remove an element from being observed
 
-
- What achieved:
+ ## What achieved:
+ 
  - enchanced performance on many elements
 
 
