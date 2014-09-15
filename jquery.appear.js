@@ -10,11 +10,9 @@
  */
 (function($) {
   var selectors = [];
-
   var check_binded = false;
-  var check_lock = false;
   var defaults = {
-    interval: 250,
+    interval: 100,
     force_process: false
   }
   var $window = $(window);
@@ -22,14 +20,11 @@
   var $prior_appeared;
 
   function process() {
-    check_lock = false;
     for (var index = 0; index < selectors.length; index++) {
       var $appeared = $(selectors[index]).filter(function() {
         return $(this).is(':appeared');
       });
-
       $appeared.trigger('appear', [$appeared]);
-
       if ($prior_appeared) {
         var $disappeared = $prior_appeared.not($appeared);
         $disappeared.trigger('disappear', [$disappeared]);
@@ -44,13 +39,11 @@
     if (!$element.is(':visible')) {
       return false;
     }
-
     var window_left = $window.scrollLeft();
     var window_top = $window.scrollTop();
     var offset = $element.offset();
     var left = offset.left;
     var top = offset.top;
-
     if (top + $element.height() >= window_top &&
         top - ($element.data('appear-top-offset') || 0) <= window_top + $window.height() &&
         left + $element.width() >= window_left &&
@@ -65,37 +58,27 @@
     // watching for element's appearance in browser viewport
     appear: function(options) {
       var opts = $.extend({}, defaults, options || {});
-      var selector = this.selector || this;
+      var selector = this;
       if (!check_binded) {
-        var on_check = function() {
-          if (check_lock) {
-            return;
-          }
-          check_lock = true;
-
-          setTimeout(process, opts.interval);
-        };
-
-        $(window).scroll(on_check).resize(on_check);
+        var debounced = $.debounce(process, opts.interval);
+        $(window)
+        .scroll(debounced)
+        .resize(debounced);
         check_binded = true;
       }
-
       if (opts.force_process) {
-        setTimeout(process, opts.interval);
+        process();
       }
       selectors.push(selector);
+      return $(selector);
+    },
+    disappear: function() {
+      var selector = this;
+      selectors = selectors.filter(function (item) {
+        return item !== selector;
+      });
       return $(selector);
     }
   });
 
-  $.extend({
-    // force elements's appearance check
-    force_appear: function() {
-      if (check_binded) {
-        process();
-        return true;
-      };
-      return false;
-    }
-  });
 })(jQuery);
