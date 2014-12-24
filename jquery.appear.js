@@ -11,13 +11,15 @@
 (function($) {
   var selectors = [];
   var check_binded = false;
+  var $window = $(window);
   var defaults = {
     interval: 100,
-    force_process: false
+    force_process: false,
+    scrolling_parent: $window
   }
-  var $window = $(window);
 
   var $prior_appeared;
+  var scrolling_parent;
 
   function process() {
     for (var index = 0; index < selectors.length; index++) {
@@ -39,15 +41,16 @@
     if (!$element.is(':visible')) {
       return false;
     }
-    var window_left = $window.scrollLeft();
-    var window_top = $window.scrollTop();
+
     var offset = $element.offset();
-    var left = offset.left;
-    var top = offset.top;
-    if (top + $element.height() >= window_top &&
-        top - ($element.data('appear-top-offset') || 0) <= window_top + $window.height() &&
-        left + $element.width() >= window_left &&
-        left - ($element.data('appear-left-offset') || 0) <= window_left + $window.width()) {
+    // calculate pos of element relative to the visible part of the scrolling_parent
+    var left = offset.left - scrolling_parent.offset().left;
+    var top = offset.top - scrolling_parent.offset().top;
+
+    if ((top + $element.height() >= 0) &&
+        (top - ($element.data('appear-top-offset') || 0) <= scrolling_parent.height()) &&
+        (left + $element.width() >= 0) &&
+        (left - ($element.data('appear-left-offset') || 0) <= scrolling_parent.width())) {
       return true;
     } else {
       return false;
@@ -61,8 +64,9 @@
       var selector = this;
       if (!check_binded) {
         var debounced = $.debounce(process, opts.interval);
+        opts.scrolling_parent
+        .scroll(debounced);
         $(window)
-        .scroll(debounced)
         .resize(debounced);
         check_binded = true;
       }
