@@ -63,11 +63,13 @@
       var opts = $.extend({}, defaults, options || {});
       var selector = this;
       if (!check_binded) {
-        var debounced = $.debounce(process, opts.interval);
-        opts.scrolling_parent
-        .scroll(debounced);
+        var debounced = $.debounce(opts.interval, false, process);
+        scrolling_parent = opts.scrolling_parent;
+
+        scrolling_parent
+          .scroll(debounced);
         $(window)
-        .resize(debounced);
+          .resize(debounced);
         check_binded = true;
       }
       if (opts.force_process) {
